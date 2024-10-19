@@ -4,8 +4,10 @@ An AI-powered workflow that automates prospect company research for a sales team
 
 ## Features
 
-- Extracts company information from the provided website.
-- Generates a detailed article about the company.
+- Extracts every link using Beautiful Soup to find the "about-us" URL.
+- Extracts information from both the provided page and the "about-us" page.
+- Passes this information to an LLM model to generate a detailed article about the company.
+- Download the article as a txt file.
 - Supports multiple languages.
 
 ## Installation
@@ -24,5 +26,12 @@ To run the application locally
 streamlit run app.py
 ```
 
-And follow the instructions in the webapp
+And follow the instructions in the web app.
+
+You will need an OpenAI API key.
+
+Another way to access the app is through the Streamlit direct link: [https://urlsearchassist.streamlit.app/](https://urlsearchassist.streamlit.app/)
+
+
+
 

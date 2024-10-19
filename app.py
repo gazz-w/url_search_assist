@@ -194,6 +194,8 @@ def main():
                 article = response["text"]
 
                 st.write(article)
+                st.download_button(label="download article", data=article,
+                                   file_name='article.txt', mime='text/plain')
                 st.success('finished!')
             else:
                 st.error(
