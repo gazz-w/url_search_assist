@@ -11,6 +11,8 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import requests
+import validators
+
 
 # Exctract links with beautiful soup
 
@@ -149,48 +151,55 @@ def main():
     if not url:
         st.warning('Pleas enter the URL')
         return
-
-    first_search = find_about_us_link(user_api_key, url)
-
-    about_url = first_search["url"]
-    if not about_url:
-        st.write(f" not found, contiuing without the about us page...")
-        about_docs = ""
     else:
-        st.write(f"About-us page: {about_url}")
-        st.success('creating the article...')
-        about_docs = get_documents_from_web(about_url)
+        try:
+            if validators.url(url):
+                st.success("Valid URL")
+                first_search = find_about_us_link(user_api_key, url)
 
-    docs = get_documents_from_web(url)
+                about_url = first_search["url"]
+                if not about_url:
+                    st.write(
+                        f" not found, contiuing without the about us page...")
+                    about_docs = ""
+                else:
+                    st.write(f"About-us page: {about_url}")
+                    st.success('creating the article...')
+                    about_docs = get_documents_from_web(about_url)
 
-    vector_store = create_vector_store(docs, user_api_key)
-    chain = create_chain(user_api_key)
+                docs = get_documents_from_web(url)
 
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+                vector_store = create_vector_store(docs, user_api_key)
+                chain = create_chain(user_api_key)
 
-    question = "produce a concise, informative article about this company for the sales team that {must_contain}"
+                retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-    relevant_docs = retriever.get_relevant_documents(question)
+                question = "produce a concise, informative article about this company for the sales team that {must_contain}"
 
-    context = "\n\n".join([doc.page_content for doc in relevant_docs])
+                relevant_docs = retriever.get_relevant_documents(question)
 
-    about_context = about_docs
+                context = "\n\n".join(
+                    [doc.page_content for doc in relevant_docs])
 
-    response = chain.invoke({
-        "context": context,
-        "about-page": about_context,
-        "question": question,
-        "must_contain": must_contain,
-        "article_structure": article_structure,
-    })
+                about_context = about_docs
 
-    article = response["text"]
+                response = chain.invoke({
+                    "context": context,
+                    "about-page": about_context,
+                    "question": question,
+                    "must_contain": must_contain,
+                    "article_structure": article_structure,
+                })
 
-    st.write(article)
-    st.success('finished!')
+                article = response["text"]
 
-    # to debug the response:
-    st.write(response)
+                st.write(article)
+                st.success('finished!')
+            else:
+                st.error(
+                    "Please enter a valid URL starting with http:// or https://")
+        except Exception as e:
+            st.error(f"An error occurred:")
 
 
 if __name__ == "__main__":
