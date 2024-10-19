@@ -100,13 +100,14 @@ def create_vector_store(docs, user_api_key):
 def create_chain(user_api_key):
     llm = ChatOpenAI(
         model_name="gpt-4o",
-        temperature=0.7,
+        temperature=1,
         openai_api_key=user_api_key,
     )
 
     prompt_template = """
-    Your task is to research all the information about these company for a sales team.
+    Your task is to research all the information about these company and produce a concise, informative article about this company for the sales team
     Company: {context}
+    about us page: {about_context}
     Output: {question} 
     Must_contain: The company name; {must_contain}
     Article_structure example: {article_structure}                                      
@@ -115,7 +116,7 @@ def create_chain(user_api_key):
     prompt = PromptTemplate(
         template=prompt_template,
         input_variables=["context", "question",
-                         "must_contain", "article_structure"]
+                         "must_contain", "article_structure", "about_context"]
     )
 
     llm_chain = LLMChain(
@@ -161,12 +162,13 @@ def main():
                 if not about_url:
                     st.write(
                         f" not found, contiuing without the about us page...")
-                    about_docs = ""
+                    about_context = about_docs = ""
                 else:
                     st.write(f"About-us page: {about_url}")
                     st.success('creating the article...')
                     about_docs = get_documents_from_web(about_url)
 
+                about_context = about_docs
                 docs = get_documents_from_web(url)
 
                 vector_store = create_vector_store(docs, user_api_key)
@@ -181,11 +183,9 @@ def main():
                 context = "\n\n".join(
                     [doc.page_content for doc in relevant_docs])
 
-                about_context = about_docs
-
                 response = chain.invoke({
                     "context": context,
-                    "about-page": about_context,
+                    "about_context": about_context,
                     "question": question,
                     "must_contain": must_contain,
                     "article_structure": article_structure,
@@ -199,7 +199,7 @@ def main():
                 st.error(
                     "Please enter a valid URL starting with http:// or https://")
         except Exception as e:
-            st.error(f"An error occurred:")
+            st.error(f"An error occurred:{e}")
 
 
 if __name__ == "__main__":
