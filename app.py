@@ -1,26 +1,11 @@
 import streamlit as st
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_community.document_loaders import WebBaseLoader
+from langchain.prompts import PromptTemplate
+from langchain.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import faiss
-from langchain.chains import create_retrieval_chain
-
-
-def main_search():
-    url = st.text_input('Enter the URL')
-
-    if not url:
-        st.warning('Please first set the API KEY and then enter the URL')
-        return
-
-    docs = get_documents_from_web(url)
-
-    return docs
-
-#############################################
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import LLMChain
 
 #  Retrieves documents from the web using the provided URL.
 
@@ -33,79 +18,62 @@ def get_documents_from_web(url):
         chunk_size=1000,
         chunk_overlap=500
     )
-    splitDocs = splitter.split_documents(docs)
-    return splitDocs
+    split_docs = splitter.split_documents(docs)
+    return split_docs
 
 # create a vector database of documents
 
 
-def create_db(docs, user_api_key):
-    embedding = OpenAIEmbeddings(api_key=user_api_key)
-    vectorStore = faiss.FAISS.from_documents(docs, embedding=embedding)
-    return vectorStore
+def create_vector_store(docs, user_api_key):
+    embeddings = OpenAIEmbeddings(openai_api_key=user_api_key)
+    vector_store = FAISS.from_documents(docs, embeddings)
+    return vector_store
+
 
 # Create a chain that retrieves the answer to the user's question
 
-
-def create_chain(vectorStore, define_api_key):
-    model = ChatOpenAI(
-        model="gpt-4o-mini",
+def create_chain(user_api_key):
+    llm = ChatOpenAI(
+        model_name="gpt-4o",
         temperature=0.7,
-        api_key=define_api_key,
-
+        openai_api_key=user_api_key,
     )
 
-    prompt = ChatPromptTemplate.from_template("""
+    prompt_template = """
     Your task is to research all the information about these company for a sales team.
     Company: {context}
-    Output: {input} 
-    Must contain: {must_contain}
+    Output: {question} 
+    Must contain: The company name; {must_contain}
     Must not contain: {must_not_contain}                                      
-    """)
+     """
 
-    chain = create_stuff_documents_chain(
-        llm=model,
-        prompt=prompt,
+    prompt = PromptTemplate(
+        template=prompt_template,
+        input_variables=["context", "question",
+                         "must_contain", "must_not_contain"]
     )
 
-    retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
-
-    retrieval_chain = create_retrieval_chain(
-        retriever,
-        chain
+    llm_chain = LLMChain(
+        llm=llm,
+        prompt=prompt
     )
 
-    return retrieval_chain
-
-#############################################
-
-
-# docs = main_search()
-
-# vectorStore = create_db(docs)
-
-# chain = create_chain(vectorStore)
-
-
-# response = chain.invoke({
-#     "input": "quais são as últimas noticias",
-
-# })
-
-# st.write(response['answer'])
-
-
-#############################################
+    return llm_chain
 
 
 def main():
-    st.set_page_config(page_title="Url Search", page_icon="🔰")
+    st.set_page_config(page_title="URL Search", page_icon="🔰")
     st.title("Sales Assistant 🔰")
     st.sidebar.header('LLM Configurations')
     st.sidebar.subheader(
-        "Follow the instructions below to set up the Aplication model.")
+        "Follow the instructions below to set up the Aplication.")
+
     user_api_key = st.sidebar.text_input(
         '1 - Enter your OpenAI API key', type='password')
+
+    if not user_api_key:
+        st.warning('Please set the API KEY')
+        return
 
     st.sidebar.header('Search Preferences')
     must_contain = st.sidebar.text_input(
@@ -113,20 +81,39 @@ def main():
     must_not_contain = st.sidebar.text_input(
         '3- Enter the information that you do not want in the article')
 
-    docs = main_search()
-    if docs:
-        vectorStore = create_db(docs, user_api_key)
-        chain = create_chain(vectorStore, user_api_key)
+    url = st.text_input('Enter the URL')
 
-        response = chain.invoke({
-            "input": "produce a concise, informative article about this prospect for the sales team",
-            "must_contain": must_contain,
-            "must_not_contain": must_not_contain,
+    if not url:
+        st.warning('Pleas enter the URL')
+        return
 
-        })
+    docs = get_documents_from_web(url)
 
-        st.write(response['answer'])
-        st.success('finished!')
+    vector_store = create_vector_store(docs, user_api_key)
+    chain = create_chain(user_api_key)
+
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+
+    question = "produce a concise, informative article about this prospect for the sales team"
+
+    relevant_docs = retriever.get_relevant_documents(question)
+
+    context = "\n\n".join([doc.page_content for doc in relevant_docs])
+
+    response = chain.invoke({
+        "context": context,
+        "question": question,
+        "must_contain": must_contain,
+        "must_not_contain": must_not_contain,
+    })
+
+    article = response["text"]
+
+    st.write(article)
+    st.success('finished!')
+
+    # to debug the response:
+    # st.write(response)
 
 
 if __name__ == "__main__":
