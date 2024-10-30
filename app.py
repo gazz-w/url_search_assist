@@ -114,7 +114,7 @@ def create_chain(user_api_key):
         Identify key leadership and decision-makers.
 
         -Products and Services:
-        Summarize their main offerings.
+        Summarize and organize in bullet points their main offerings.
         Highlight any unique selling propositions or innovative solutions.
         
         -Market Position:
@@ -131,18 +131,7 @@ def create_chain(user_api_key):
         Suggest ways we could add value or differentiate from competitors.
         
     
-    #Structure:
-
-        -Introduction:
-        Provide a brief overview of the company and its industry.
-
-        -Main sections:
-        Company Background: History, mission, and leadership.
-        Products and services: key offerings and unique features.
-        Market Position: Target audience and industry standings.
-        Recent Developments: Latest news and significant events.
-        Opportunities: Potential areas for collaboration or growth and How our solutions aligns with their needs.
-
+    
     #Conclusion:
         - Summarize the key insights and recommend next steps for the sales team.
 
@@ -175,6 +164,59 @@ def create_chain(user_api_key):
     )
 
     return llm_chain
+
+
+def review_generated_text(generated_text, user_api_key):
+    llm_reviewer = ChatOpenAI(
+        model_name="gpt-4o",
+        temperature=0,
+        openai_api_key=user_api_key,
+    )
+
+    review_prompt_template = """
+    You are the reviewer of the AI-generated article.
+    Please review the text below and ensure the content is structured as follows: [
+        #Introduction about the Company Overview.
+        #Main sections:
+            Company Background.
+            Products and services.
+            Market Position.
+            Recent News and Developments.
+            Opportunities.
+        #Conclusion
+    ]
+
+      
+    #Specific Instructions:
+    If the content is not structure correctly, make the necessary adjustments to ensure the article is informative and suitable for a sales audience.
+
+    Organize content with headings. 
+     
+    Organize opportunities in bullet points where appropriate.
+
+    Do not include or remove any information from the text, only restructure the content to meet the requirements.
+    
+    The outuput must be only the revised text.
+
+    Texto para revisar:
+    {generated_text}
+
+    revised text:
+    """
+
+    prompt = PromptTemplate(
+        template=review_prompt_template,
+        input_variables=["generated_text"]
+    )
+
+    llm_chain = LLMChain(
+        llm=llm_reviewer,
+        prompt=prompt
+    )
+
+    response = llm_chain.run(generated_text=generated_text)
+
+    return response
 
 
 def main():
@@ -243,8 +285,10 @@ def main():
 
                 article = response["text"]
 
-                st.write(article)
-                st.download_button(label="download article", data=article,
+                revised_article = review_generated_text(article, user_api_key)
+
+                st.write(revised_article)
+                st.download_button(label="download article", data=revised_article,
                                    file_name='article.txt', mime='text/plain')
                 st.success('finished!')
             else:
