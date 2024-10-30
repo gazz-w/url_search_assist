@@ -104,19 +104,69 @@ def create_chain(user_api_key):
         openai_api_key=user_api_key,
     )
 
-    prompt_template = """
-    Your task is to research all the information about these company and produce a concise, informative article about this company for the sales team
-    Company: {context}
-    about us page: {about_context}
-    Output: {question} 
-    Must_contain: The company name; {must_contain}
-    Article_structure example: {article_structure}                                      
-     """
+    prompt_template = """Using the company website at #company, create a concise and informative article for our sales team.
+    The article should provide a comprehensive understanding of the prospect to aid in tailoring our sales approach. 
+    Instructions:
+    #Chain-of-Thought Analysis:
+
+        -Company Overview:
+        Examine the company's history, mission, and core values.
+        Identify key leadership and decision-makers.
+
+        -Products and Services:
+        Summarize their main offerings.
+        Highlight any unique selling propositions or innovative solutions.
+        
+        -Market Position:
+        Determine their target markets and customer segments.
+        Assess their competitive landscape and market share.
+        
+        -Recent News and Developments:
+        Note any recent press releases, news articles, or significant announcements.
+        Include partnerships, mergers, acquisitions, or expansions.
+        
+        -Potential Opportunities:
+        Based on #my_company_area, and information gathered, suggest potential areas for collaboration or partnership.
+        Identify challenges they face that our products/services can address.
+        Suggest ways we could add value or differentiate from competitors.
+        
+    
+    #Structure:
+
+        -Introduction:
+        Provide a brief overview of the company and its industry.
+
+        -Main sections:
+        Company Background: History, mission, and leadership.
+        Products and services: key offerings and unique features.
+        Market Position: Target audience and industry standings.
+        Recent Developments: Latest news and significant events.
+        Opportunities: Potential areas for collaboration or growth and How our solutions aligns with their needs.
+
+    #Conclusion:
+        - Summarize the key insights and recommend next steps for the sales team.
+
+    #Specific Instructions:
+        -Lenght: Keep the article between 400-600 words.
+        -Tone: Professional and informative, suitable for a sales audience.
+        -style: Use clear and concise language, avoiding jargon or technical terms. Organize content with headings and bullet points where appropriate.
+
+    #Additional instructions:
+        -Do not include any confidential or proprietary information not publicly available.
+        -Write as if explaining to someone unfamiliar with the company.
+
+        
+    #Company: {context}
+    #about_us_page: {about_context}
+    #Output: {question} 
+    #Must_contain: The company name; {must_contain}
+    #My_company_area: {my_company_area}
+    """
 
     prompt = PromptTemplate(
         template=prompt_template,
         input_variables=["context", "question",
-                         "must_contain", "article_structure", "about_context"]
+                         "must_contain", "my_company_area", "about_context"]
     )
 
     llm_chain = LLMChain(
@@ -144,8 +194,8 @@ def main():
     st.sidebar.header('Search Preferences')
     must_contain = st.sidebar.text_input(
         '2- Enter the information that must be in the article')
-    article_structure = st.sidebar.text_area(
-        '3- Enter a model or structure that you want included in the article')
+    my_company_area = st.sidebar.text_input(
+        '3- Enter your company area and product')
 
     url = st.text_input('Enter the URL')
 
@@ -188,7 +238,7 @@ def main():
                     "about_context": about_context,
                     "question": question,
                     "must_contain": must_contain,
-                    "article_structure": article_structure,
+                    "my_company_area": my_company_area,
                 })
 
                 article = response["text"]
