@@ -175,7 +175,7 @@ def review_generated_text(generated_text, user_api_key):
 
     review_prompt_template = """
     You are the reviewer of the AI-generated article.
-    Please review the text below and ensure the content is structured as follows: [
+    Please review the text, you dont need to write the name topics, only review and ensure the content and structure it as follows: [
         #Introduction about the Company Overview.
         #Main sections:
             Company Background.
@@ -188,7 +188,11 @@ def review_generated_text(generated_text, user_api_key):
 
       
     #Specific Instructions:
+    
+
     If the content is not structure correctly, make the necessary adjustments to ensure the article is informative and suitable for a sales audience.
+
+    You dont have to write the topics,
 
     Organize content with headings. 
      
