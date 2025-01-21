@@ -109,23 +109,23 @@ def create_chain(user_api_key):
     Instructions:
     #Chain-of-Thought Analysis:
 
-        -Company Overview:
+        - Company Overview:
         Examine the company's history, mission, and core values.
         Identify key leadership and decision-makers.
 
-        -Products and Services:
+        - Products and Services:
         Summarize and organize in bullet points their main offerings.
         Highlight any unique selling propositions or innovative solutions.
         
-        -Market Position:
+        - Market Position:
         Determine their target markets and customer segments.
         Assess their competitive landscape and market share.
         
-        -Recent News and Developments:
+        - Recent News and Developments:
         Note any recent press releases, news articles, or significant announcements.
         Include partnerships, mergers, acquisitions, or expansions.
         
-        -Potential Opportunities:
+        - Potential Opportunities:
         Based on #my_company_area, and information gathered, suggest potential areas for collaboration or partnership.
         Identify challenges they face that our products/services can address.
         Suggest ways we could add value or differentiate from competitors.
@@ -136,13 +136,13 @@ def create_chain(user_api_key):
         - Summarize the key insights and recommend next steps for the sales team.
 
     #Specific Instructions:
-        -Lenght: Keep the article between 400-600 words.
-        -Tone: Professional and informative, suitable for a sales audience.
-        -style: Use clear and concise language, avoiding jargon or technical terms. Organize content with headings and bullet points where appropriate.
+        - Lenght: Keep the article between 400-600 words.
+        - Tone: Professional and informative, suitable for a sales audience.
+        - style: Use clear and concise language, avoiding jargon or technical terms. Organize content with headings and bullet points where appropriate.
 
     #Additional instructions:
-        -Do not include any confidential or proprietary information not publicly available.
-        -Write as if explaining to someone unfamiliar with the company.
+        - Do not include any confidential or proprietary information not publicly available.
+        - Write as if explaining to someone unfamiliar with the company.
 
         
     #Company: {context}
