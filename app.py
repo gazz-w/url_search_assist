@@ -107,7 +107,7 @@ def create_chain(user_api_key):
     prompt_template = """Using the company website at #company, create a concise and informative article for our sales team.
     The article should provide a comprehensive understanding of the prospect to aid in tailoring our sales approach. 
     Instructions:
-    #Chain-of-Thought Analysis:
+    # Chain-of-Thought Analysis:
 
         - Company Overview:
         Examine the company's history, mission, and core values.
@@ -132,24 +132,24 @@ def create_chain(user_api_key):
         
     
     
-    #Conclusion:
+    # Conclusion:
         - Summarize the key insights and recommend next steps for the sales team.
 
-    #Specific Instructions:
+    # Specific Instructions:
         - Lenght: Keep the article between 400-600 words.
         - Tone: Professional and informative, suitable for a sales audience.
         - style: Use clear and concise language, avoiding jargon or technical terms. Organize content with headings and bullet points where appropriate.
 
-    #Additional instructions:
+    # Additional instructions:
         - Do not include any confidential or proprietary information not publicly available.
         - Write as if explaining to someone unfamiliar with the company.
 
         
-    #Company: {context}
-    #about_us_page: {about_context}
-    #Output: {question} 
-    #Must_contain: The company name; {must_contain}
-    #My_company_area: {my_company_area}
+    # Company: {context}
+    # about_us_page: {about_context}
+    # Output: {question} 
+    # Must_contain: The company name; {must_contain}
+    # My_company_area: {my_company_area}
     """
 
     prompt = PromptTemplate(
@@ -176,18 +176,18 @@ def review_generated_text(generated_text, user_api_key):
     review_prompt_template = """
     You are the reviewer of the AI-generated article.
     Please review the text, you dont need to write the name topics, only review and ensure the content and structure it as follows: [
-        #Introduction about the Company Overview.
-        #Main sections:
+        # Introduction about the Company Overview.
+        # Main sections:
             Company Background.
             Products and services.
             Market Position.
             Recent News and Developments.
             Opportunities.
-        #Conclusion
+        # Conclusion
     ]
 
       
-    #Specific Instructions:
+    # Specific Instructions:
     
 
     If the content is not structure correctly, make the necessary adjustments to ensure the article is informative and suitable for a sales audience.
