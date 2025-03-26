@@ -32,6 +32,10 @@ You will need an OpenAI API key.
 
 Another way to access the app is through the Streamlit direct link: [https://urlsearchassist.streamlit.app/](https://urlsearchassist.streamlit.app/)
 
+## Demo Video
+
+[Assista à demonstração do projeto](https://www.linkedin.com/feed/update/urn:li:activity:7303430159213170688/)
+
 
 
 
