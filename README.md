@@ -34,7 +34,7 @@ Another way to access the app is through the Streamlit direct link: [https://url
 
 ## Demo Video
 
-[Assista à demonstração do projeto](https://www.linkedin.com/feed/update/urn:li:activity:7303430159213170688/)
+[LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7303430159213170688/)
 
 
 
